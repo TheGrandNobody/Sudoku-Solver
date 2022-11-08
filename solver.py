@@ -13,15 +13,23 @@ class DPLL():
     self.solve(path)
 
   def solve(self, path) -> None:
-    """ Solves the .cnf file this solver was 
+    """ Solves the .cnf file this solver was given.
+
+    Args:
+        path (str): The path to the .cnf file holding the sudoku and its rules in DIMACS format.
     """
     with open(path, 'r') as f:
         lines = "".join(f.readlines()).split(' 0\n')[:-1]
-    clauses = lines[1:]
-    variables = defaultdict(lambda: None)
+    self.clauses = lines[1:]
+    self.variables = defaultdict(lambda: None)
+  
+  def propagate(self, clause):
+      self.variables[int(clause)] = True
+      return clause
 
-
-
+  def unit_propagate(self):
+      self.clauses = [self.propagate(c) for c in self.clauses if len(c.split(" ")) > 1]    
+              
 
 
 
