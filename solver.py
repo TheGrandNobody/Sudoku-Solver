@@ -28,9 +28,16 @@ class DPLL():
       return clause
 
   def unit_propagate(self):
-      self.clauses = [self.propagate(c) for c in self.clauses if len(c.split(" ")) > 1]    
-              
-
+      self.clauses = [self.propagate(c) for c in self.clauses if len(c.split(" ")) > 1]   
+    
+  def is_empty(self):
+      if len(self.clauses) == 0:
+          return True
+    
+  def empty_clauses(self):
+      if any(len(clause) == 0 for clause in self.clauses):
+          return False
+        
 
 
 
