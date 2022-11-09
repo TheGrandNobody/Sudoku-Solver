@@ -164,18 +164,22 @@ def make_cnf_dimacs(sudoku_in, out_file):
     return nn_bits
 
 def dupe(out_file, n):
-    lines = open(out_file, 'r').readlines()
+    lines_set = open(out_file, 'r').readlines()
 
-    lines_set = set(lines)
-
+    lines_set = set(lines_set)
+    print(len(lines_set))
+    lines_set = sorted(lines_set)
     print(len(lines_set))
 
     out  = open(out_file, 'w')
 
     for line in lines_set:
         out.write(line)
+    
+    out.close()
 
     insert(out_file, f"p cnf {n} {len(lines_set)}")
+
     print('fini')
 
 
@@ -190,4 +194,4 @@ def main():
 if __name__ == "__main__":
     main()
 
-    #python3 solve_sudoku.py sudoku/test.txt
+    #python3 SAT.py sudoku/test.txt
