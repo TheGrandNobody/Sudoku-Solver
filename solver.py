@@ -1,4 +1,5 @@
 import copy
+from typing import List
 from collections import defaultdict
 
 class DPLL():
@@ -23,6 +24,7 @@ class DPLL():
       """
       self.last = copy.deepcopy(self.clauses)
       self.unit_propagate()
+
     
   def unit(self, clause: str) -> str:
       """ Updates the list of literals for a given clause, if it is a unit clause.
@@ -39,11 +41,21 @@ class DPLL():
           # Return the close to store it in a list
           return clause
 
+  def is_unit(self, clause: str, units: List) -> bool:
+      def check(unit):
+          return unit in clause
+      return False in list(map(check, units))
+
   def unit_propagate(self) -> None:
       """ Updates the list of clauses based on the unit propagation rule.
       """
       units = list(map(self.unit, self.clauses))
-      self.clauses = [c for c in self.clauses if c not in units]
+      self.clauses = [c for c in self.clauses if self.is_unit(c, units)]
+  
+  def pure_literal(self) -> None:
+      """_summary_
+      """
+      
     
   def is_empty(self):
       if len(self.clauses) == 0:
