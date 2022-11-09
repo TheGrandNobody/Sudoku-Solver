@@ -21,17 +21,37 @@ class DPLL():
       # Whether the algorithm has constructed the list of unassigned variables yet
       self.start = True
     
-  def solve(self) -> None:
+  def solve(self) -> bool:
       """ Solves the .cnf file this solver was given.
 
       Args:
           path (str): The path to the .cnf file holding the sudoku and its rules in DIMACS format.
+      
+      Returns:
+          bool: Whether a solution was found or not 
       """
-      self.last = copy.deepcopy(self.clauses)
+      # Apply the unit clause rule
       self.unit_propagate()
       if self.start:
           self.start = False
+      # Apply the pure literal rule
       self.pure_literal()
+      # Check whether the KB is empty
+      if self.kb_empty():
+          print("SAT")
+          return True
+      # Check whether there are any empty clauses
+      if self.empty_clauses():
+          print("UNSAT")
+          return False
+      # Choose a literal
+      # Save the state
+      # Call this function recursively
+      # ???
+      # Profit
+      # Cry because DPLL sucks
+
+      
 
   def assign(self, variable: str) -> None:
       """ Assigns a true or false value to a given variable.
@@ -100,17 +120,13 @@ class DPLL():
               self.assign(variable)
               self.clauses = [c for c in self.clauses if variable not in c]
       map(verify_pure, self.remaining)
-      
-  def is_empty(self):
-      if len(self.clauses) == 0:
-          print("SAT")
+
+  def kb_empty(self):
+      return len(self.clauses) == 0
     
   def empty_clauses(self):
-      if any(len(clause) == 0 for clause in self.clauses):
-          print("UNSAT")
+      return any(len(clause) == 0 for clause in self.clauses)
         
-
-
 
 """
 function DPLL(Φ)
