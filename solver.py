@@ -46,12 +46,10 @@ class DPLL():
           return False
       # Choose a literal
       # Save the state
-      # Call this function recursively
+      # Call this function recursively: (return DPLL(Φ ∧ {l}) or DPLL(Φ ∧ {not(l)}))
       # ???
       # Profit
       # Cry because DPLL sucks
-
-      
 
   def assign(self, variable: str) -> None:
       """ Assigns a true or false value to a given variable.
@@ -126,18 +124,3 @@ class DPLL():
     
   def empty_clauses(self):
       return any(len(clause) == 0 for clause in self.clauses)
-        
-
-"""
-function DPLL(Φ)
-    while there is a unit clause {l} in Φ do
-        Φ ← unit-propagate(l, Φ);
-    while there is a literal l that occurs pure in Φ do
-        Φ ← pure-literal-assign(l, Φ);
-    if Φ is empty then
-        return true;
-    if Φ contains an empty clause then
-        return false;
-    l ← choose-literal(Φ);
-    return DPLL(Φ ∧ {l}) or DPLL(Φ ∧ {not(l)});
-"""
