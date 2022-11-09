@@ -31,6 +31,7 @@ class DPLL():
       self.unit_propagate()
       if self.start:
           self.start = False
+      self.pure_literal()
 
   def assign(self, variable: str) -> None:
       """ Assigns a true or false value to a given variable.
@@ -46,17 +47,6 @@ class DPLL():
       # Remove the variable from the list of unsassigned variables.
       if not self.start:
           self.remaining.remove(variable)
-
-  def contains(clause: str, elements: List) -> bool:
-      """ Checks whether a given clause contains one of a list of (pure/unit) variables/clauses.
-
-      Args:
-          clause (str): The specified clause.
-
-      Returns:
-          bool: True if it contains any of the clauses, otherwise False
-      """
-      return True in [c in clause for c in elements] 
 
   def unit_propagate(self) -> None:
       """ Updates the list of clauses based on the unit propagation rule.
