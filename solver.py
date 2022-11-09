@@ -47,56 +47,69 @@ class DPLL():
       if not self.start:
           self.remaining.remove(variable)
 
-  def unit(self, clause: str) -> str:
-      """ Updates the list of literals for a given clause, if it is a unit clause.
-          Builds a list of unassigned variables if this is the algorithm's first iteration.
+  def contains(clause: str, elements: List) -> bool:
+      """ Checks whether a given clause contains one of a list of (pure/unit) variables/clauses.
 
       Args:
-          clause (str): The specified clause. 
+          clause (str): The specified clause.
 
       Returns:
-          str: A unit clause.
+          bool: True if it contains any of the clauses, otherwise False
       """
-      split_clause = clause.split(" ")
-      if len(split_clause) == 1:
-          # Set the literal to true/false if it is a unit clause
-          self.assign(clause)
-          # Return the close to store it in a list
-          return clause
-      if self.start:
-          # Update the list of unassigned variables for the algorithm's first iteration
-          def update(variable) -> None:
-              if variable not in self.remaining:
-                  self.remaining.append(variable)
-          map(update, split_clause)
+      return True in [c in clause for c in elements] 
 
   def unit_propagate(self) -> None:
       """ Updates the list of clauses based on the unit propagation rule.
       """
-      units = list(map(self.unit, self.clauses))
-      def is_unit(clause: str) -> bool:
-          return True in [unit in clause for unit in units] 
-      self.clauses = [c for c in self.clauses if not is_unit(c, units)]
-  
-  def pure(self, clause: str) -> bool:
-      positive, negative = 0, 0
-      for c in self.clauses:
-          result = c.find(clause)
-          if result != -1:
-              if result == 0 or c[result - 1] != '-':
-                  positive += 1
-              else: 
-                  negative += 1
-      return not (negative > 1 and positive > 1)      
-  
-  def is_pure(self, clause: str): # No need to check for every c in self.clauses
-      if self.pure(clause):
-          self.assign
+      def unit(clause: str) -> None:
+          """ Updates the list of literals for a given clause, if it is a unit clause.
+              Builds a list of unassigned variables if this is the algorithm's first iteration.
+
+          Args:
+              clause (str): The specified clause. 
+
+          Returns:
+              str: A unit clause.
+          """
+          split_clause = clause.split(" ")
+          if len(split_clause) == 1:
+              # Set the literal to true/false if it is a unit clause
+              self.assign(clause)
+              # Return the close to store it in a list
+              self.clauses = [c for c in self.clauses if clause not in c]  
+              return
+          if self.start:
+              # Update the list of unassigned variables for the algorithm's first iteration
+              def update(variable) -> None:
+                  if variable not in self.remaining and variable not in self.assignments:
+                      self.remaining.append(variable)
+              map(update, split_clause)
+      map(unit, copy.deepcopy(self.clauses))
   
   def pure_literal(self) -> None:
       """ Assigns a true or false value to all pure literals
       """
-      map(self.is_pure, self.remaining)
+      def verify_pure(variable: str):
+          """ Verifies and handles a given unassigned variable on the basis of whether it is a pure literal.
+
+          Args:
+              variable (str): The specified variable
+          """
+          positive, negative = 0, 0
+          # Check that the variable is either only positive or negative in all of the clauses it appears in.
+          for clause in self.clauses:
+              result = clause.find(variable)
+              if result != -1:
+                  if result == 0 or clause[result - 1] != '-':
+                      positive += 1
+                  else: 
+                      negative += 1
+          is_pure = not (negative > 1 and positive > 1)
+          # Assign the literal a truth value and remove all clauses containing it.
+          if is_pure:
+              self.assign(variable)
+              self.clauses = [c for c in self.clauses if variable not in c]
+      map(verify_pure, self.remaining)
       
   def is_empty(self):
       if len(self.clauses) == 0:
