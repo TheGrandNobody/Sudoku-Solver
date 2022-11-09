@@ -1,34 +1,49 @@
-import sys
+import copy
 from collections import defaultdict
 
 class DPLL():
   """Implements the DPLL solver class.
   """
   def __init__(self, path: str) -> None:
-    """ Initializes a DPLL solver.
+      """ Initializes a DPLL solver.
 
-    Args:
-        path (str): The path to the .cnf file holding the sudoku and its rules in DIMACS format.
-    """
-    self.solve(path)
+      Args:
+          path (str): The path to the .cnf file holding the sudoku and its rules in DIMACS format.
+      """
+      with open(path, 'r') as f:
+          lines = "".join(f.readlines()).split(' 0\n')[:-1]
+      self.clauses = lines[1:]
+      self.literals = defaultdict(lambda: None)
+    
+  def solve(self) -> None:
+      """ Solves the .cnf file this solver was given.
 
-  def solve(self, path) -> None:
-    """ Solves the .cnf file this solver was given.
+      Args:
+          path (str): The path to the .cnf file holding the sudoku and its rules in DIMACS format.
+      """
+      self.last = copy.deepcopy(self.clauses)
+      self.unit_propagate()
+    
+  def unit(self, clause: str) -> str:
+      """ Updates the list of literals for a given clause, if it is a unit clause.
 
-    Args:
-        path (str): The path to the .cnf file holding the sudoku and its rules in DIMACS format.
-    """
-    with open(path, 'r') as f:
-        lines = "".join(f.readlines()).split(' 0\n')[:-1]
-    self.clauses = lines[1:]
-    self.variables = defaultdict(lambda: None)
-  
-  def propagate(self, clause):
-      self.variables[int(clause)] = True
-      return clause
+      Args:
+          clause (str): The specified clause. 
 
-  def unit_propagate(self):
-      self.clauses = [self.propagate(c) for c in self.clauses if len(c.split(" ")) > 1]   
+      Returns:
+          str: A unit clause.
+      """
+      if len(clause.split(" ")) == 1:
+          # Set the literal to true/false if it is a unit clause
+          self.literals[int(clause)] = '-' not in clause
+          # Return the close to store it in a list
+          return clause
+
+  def unit_propagate(self) -> None:
+      """ Updates the list of clauses based on the unit propagation rule.
+      """
+      units = list(map(self.unit, self.clauses))
+      self.clauses = [c for c in self.clauses if c not in units]
     
   def is_empty(self):
       if len(self.clauses) == 0:
