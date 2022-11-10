@@ -1,5 +1,5 @@
 import copy
-from typing import List
+from typing import List, Dict
 
 class DPLL():
   """Implements the DPLL solver class.
@@ -14,14 +14,10 @@ class DPLL():
           lines = "".join(f.readlines()).split(' 0\n')[:-1]
       # The problem's KB
       self.clauses = lines[1:]
-      # The problem's remaining unassigned variables
-      self.remaining = []
-      # The problem's assigned variables
-      self.assignments = {}
       # Whether the algorithm has constructed the list of unassigned variables yet
       self.start = True
     
-  def solve(self) -> bool:
+  def solve(self, remaining: List, assignments: Dict, kb: List) -> bool:
       """ Solves the .cnf file this solver was given.
 
       Args:
@@ -31,17 +27,17 @@ class DPLL():
           bool: Whether a solution was found or not 
       """
       # Apply the unit clause rule
-      self.unit_propagate()
+      self.unit_propagate(kb)
       if self.start:
           self.start = False
       # Apply the pure literal rule
-      self.pure_literal()
+      self.pure_literal(kb)
       # Check whether the KB is empty
-      if self.kb_empty():
+      if self.kb_empty(kb):
           print("SAT")
           return True
       # Check whether there are any empty clauses
-      if self.empty_clauses():
+      if self.empty_clauses(kb):
           print("UNSAT")
           return False
       # Choose a literal
@@ -51,7 +47,7 @@ class DPLL():
       # Profit
       # Cry because DPLL sucks
 
-  def assign(self, variable: str) -> None:
+  def assign(self, remaining: List, assignments: Dict, variable: str) -> None:
       """ Assigns a true or false value to a given variable.
           Removes the variable from the unassigned variables list. 
 
@@ -59,14 +55,14 @@ class DPLL():
           variable (str): The specified variable.
       """
       if '-' in variable:
-          self.assignments[variable[1:]] = False
+          assignments[variable[1:]] = False
       else: 
-          self.assignments[variable] = True
+          assignments[variable] = True
       # Remove the variable from the list of unsassigned variables.
       if not self.start:
-          self.remaining.remove(variable)
+          remaining.remove(variable)
 
-  def unit_propagate(self) -> None:
+  def unit_propagate(self, remaining: List, assignments: Dict, kb: List) -> None:
       """ Updates the list of clauses based on the unit propagation rule.
       """
       def unit(clause: str) -> None:
@@ -82,19 +78,19 @@ class DPLL():
           split_clause = clause.split(" ")
           if len(split_clause) == 1:
               # Set the literal to true/false if it is a unit clause
-              self.assign(clause)
+              self.assign(remaining, assignments, clause)
               # Return the close to store it in a list
-              self.clauses = [c for c in self.clauses if clause not in c]  
+              kb = [c for c in kb if clause not in c]  
               return
           if self.start:
               # Update the list of unassigned variables for the algorithm's first iteration
               def update(variable) -> None:
-                  if variable not in self.remaining and variable not in self.assignments:
-                      self.remaining.append(variable)
+                  if variable not in remaining and variable not in assignments:
+                      remaining.append(variable)
               map(update, split_clause)
-      map(unit, copy.deepcopy(self.clauses))
+      map(unit, copy.deepcopy(kb))
   
-  def pure_literal(self) -> None:
+  def pure_literal(self, remaining: List, assignments: Dict, kb: List) -> None:
       """ Assigns a true or false value to all pure literals
       """
       def verify_pure(variable: str):
@@ -105,7 +101,7 @@ class DPLL():
           """
           positive, negative = 0, 0
           # Check that the variable is either only positive or negative in all of the clauses it appears in.
-          for clause in self.clauses:
+          for clause in kb:
               result = clause.find(variable)
               if result != -1:
                   if result == 0 or clause[result - 1] != '-':
@@ -115,12 +111,12 @@ class DPLL():
           is_pure = not (negative > 1 and positive > 1)
           # Assign the literal a truth value and remove all clauses containing it.
           if is_pure:
-              self.assign(variable)
-              self.clauses = [c for c in self.clauses if variable not in c]
-      map(verify_pure, self.remaining)
+              self.assign(remaining, assignments, variable)
+              kb = [c for c in kb if variable not in c]
+      map(verify_pure, remaining)
 
-  def kb_empty(self):
-      return len(self.clauses) == 0
+  def kb_empty(kb):
+      return len(kb) == 0
     
-  def empty_clauses(self):
-      return any(len(clause) == 0 for clause in self.clauses)
+  def empty_clauses(kb):
+      return any(len(clause) == 0 for clause in kb)
