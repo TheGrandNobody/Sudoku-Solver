@@ -26,12 +26,13 @@ class DPLL():
       Returns:
           bool: Whether a solution was found or not 
       """
+      
       # Apply the unit clause rule
-      self.unit_propagate(kb)
+      self.unit_propagate(remaining, assignments, kb)
       if self.start:
           self.start = False
       # Apply the pure literal rule
-      self.pure_literal(kb)
+      self.pure_literal(remaining, assignments, kb)
       # Check whether the KB is empty
       if self.kb_empty(kb):
           print("SAT")
@@ -93,7 +94,7 @@ class DPLL():
   def pure_literal(self, remaining: List, assignments: Dict, kb: List) -> None:
       """ Assigns a true or false value to all pure literals
       """
-      def verify_pure(variable: str):
+      def verify_pure(variable: str) -> None:
           """ Verifies and handles a given unassigned variable on the basis of whether it is a pure literal.
 
           Args:
