@@ -21,10 +21,14 @@ class DPLL():
       """ Solves the .cnf file this solver was given.
 
       Args:
-          path (str): The path to the .cnf file holding the sudoku and its rules in DIMACS format.
-      
+          remaining (List): The remaining unassigned variables.
+          assignments (Dict): The assigned variables and their assigned values.
+          kb (List): The knowledge base (all of the clauses).
+          split (bool, optional): Whether this is a splitting instance or not. Defaults to False.
+          value (_type_, optional): The value of the assigned variable for this splitting instance. Defaults to None.
+
       Returns:
-          bool: Whether a solution was found or not 
+          bool: Whether a solution was found or not.
       """
       # Apply the split if this is a splitting instance
       if split:
@@ -53,6 +57,8 @@ class DPLL():
           Removes the variable from the unassigned variables list. 
 
       Args:
+          remaining (List): The remaining unassigned variables.
+          assignments (Dict): The assigned variables and their assigned values.
           variable (str): The specified variable.
       """
       if '-' in variable:
@@ -65,6 +71,11 @@ class DPLL():
 
   def unit_propagate(self, remaining: List, assignments: Dict, kb: List) -> None:
       """ Updates the list of clauses based on the unit propagation rule.
+
+      Args:
+          remaining (List): The remaining unassigned variables.
+          assignments (Dict): The assigned variables and their assigned values.
+          kb (List): The knowledge base (all of the clauses).
       """
       def unit(clause: str) -> None:
           """ Updates the list of literals for a given clause, if it is a unit clause.
@@ -93,12 +104,17 @@ class DPLL():
   
   def pure_literal(self, remaining: List, assignments: Dict, kb: List) -> None:
       """ Assigns a true or false value to all pure literals
+
+      Args:
+          remaining (List): The remaining unassigned variables.
+          assignments (Dict): The assigned variables and their assigned values.
+          kb (List): The knowledge base (all of the clauses).
       """
       def verify_pure(variable: str) -> None:
           """ Verifies and handles a given unassigned variable on the basis of whether it is a pure literal.
 
           Args:
-              variable (str): The specified variable
+              variable (str): The specified variable.
           """
           positive, negative = 0, 0
           # Check that the variable is either only positive or negative in all of the clauses it appears in.
@@ -116,8 +132,24 @@ class DPLL():
               kb = [c for c in kb if variable not in c]
       map(verify_pure, remaining)
 
-  def kb_empty(kb):
+  def kb_empty(kb: List) -> bool:
+      """ Verifies whether a given knowledge base is empty.
+
+      Args:
+          kb (List): The knowledge base (all of the clauses).
+
+      Returns:
+          bool: True if the knowledge base is empty, else False.
+      """
       return len(kb) == 0
     
-  def empty_clauses(kb):
+  def empty_clauses(kb: List) -> bool:
+      """ Verifies whether the knowledge base contains any empty clause.
+
+      Args:
+          kb (List): The knowledge base (all of the clauses).
+
+      Returns:
+          bool: True if an empty clause exists, else False.
+      """
       return any(len(clause) == 0 for clause in kb)
