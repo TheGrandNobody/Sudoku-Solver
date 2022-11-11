@@ -17,7 +17,7 @@ class DPLL():
       # Whether the algorithm has constructed the list of unassigned variables yet
       self.start = True
     
-  def solve(self, remaining: List, assignments: Dict, kb: List) -> bool:
+  def solve(self, remaining: List, assignments: Dict, kb: List, split=False, value=None) -> bool:
       """ Solves the .cnf file this solver was given.
 
       Args:
@@ -26,6 +26,9 @@ class DPLL():
       Returns:
           bool: Whether a solution was found or not 
       """
+      # Apply the split if this is a splitting instance
+      if split:
+          assignments[remaining.pop()] = value
       
       # Apply the unit clause rule
       self.unit_propagate(remaining, assignments, kb)
@@ -41,12 +44,9 @@ class DPLL():
       if self.empty_clauses(kb):
           print("UNSAT")
           return False
-      # Choose a literal
-      # Save the state
-      # Call this function recursively: (return DPLL(Φ ∧ {l}) or DPLL(Φ ∧ {not(l)}))
-      # ???
-      # Profit
-      # Cry because DPLL sucks
+      # Split using a positive value, otherwise backtrack using a negative value
+      return self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, True) or \
+        self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, False)
 
   def assign(self, remaining: List, assignments: Dict, variable: str) -> None:
       """ Assigns a true or false value to a given variable.
