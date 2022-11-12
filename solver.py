@@ -16,6 +16,8 @@ class DPLL():
       self.clauses = lines[1:]
       # Whether the algorithm has constructed the list of unassigned variables yet
       self.start = True
+      # Whether the algorithm found a solution or not
+      self.found = False
     
   def solve(self, remaining: List, assignments: Dict, kb: List, split=False, value=None) -> bool:
       """ Solves the .cnf file this solver was given.
@@ -52,8 +54,12 @@ class DPLL():
           print("UNSAT")
           return False
       # Split using a positive value, otherwise backtrack using a negative value
-      return self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, True) or \
-        self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, False)
+      if self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, True) or \
+        self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, False):
+          if not self.found:
+              self.solution = assignments
+              self.found = True
+      return self.found
 
   def assign(self, remaining: List, assignments: Dict, variable: str) -> None:
       """ Assigns a true or false value to a given variable.
@@ -101,7 +107,9 @@ class DPLL():
           if self.start:
               # Update the list of unassigned variables for the algorithm's first iteration
               def update(variable) -> None:
-                  if variable not in remaining and variable not in assignments:
+                  anti = variable[1:] if '-' in variable else f'-{variable}'
+                  if variable not in remaining and variable not in assignments \
+                     and anti not in remaining and anti not in assignments:
                       remaining.append(variable)
               map(update, split_clause)
       map(unit, copy.deepcopy(kb))
@@ -133,7 +141,8 @@ class DPLL():
           # Assign the literal a truth value and remove all clauses containing it.
           if is_pure:
               self.assign(remaining, assignments, variable)
-              kb = [c for c in kb if variable not in c]
+              anti = clause[1:] if '-' in clause else f'-{clause}'
+              kb = [c for c in kb if clause not in c or anti in c] 
       map(verify_pure, remaining)
 
   def kb_empty(kb: List) -> bool:
