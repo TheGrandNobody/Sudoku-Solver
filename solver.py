@@ -32,7 +32,10 @@ class DPLL():
       """
       # Apply the split if this is a splitting instance
       if split:
-          assignments[remaining.pop()] = value
+          variable = remaining.pop()
+          assignments[variable] = value
+          anti = variable[1:] if '-' in variable else f'-{variable}'
+          kb = [c for c in kb if variable not in c or anti in c] 
       
       # Apply the unit clause rule
       self.unit_propagate(remaining, assignments, kb)
@@ -91,8 +94,9 @@ class DPLL():
           if len(split_clause) == 1:
               # Set the literal to true/false if it is a unit clause
               self.assign(remaining, assignments, clause)
-              # Return the close to store it in a list
-              kb = [c for c in kb if clause not in c]  
+              # Return the close to store it in a list 
+              anti = clause[1:] if '-' in clause else f'-{clause}'
+              kb = [c for c in kb if clause not in c or anti in c] 
               return
           if self.start:
               # Update the list of unassigned variables for the algorithm's first iteration
