@@ -4,28 +4,37 @@ from typing import List, Dict
 class DPLL():
   """Implements the DPLL solver class.
   """
-  def __init__(self, path: str) -> None:
+  def __init__(self) -> None:
       """ Initializes a DPLL solver.
-
-      Args:
-          path (str): The path to the .cnf file holding the sudoku and its rules in DIMACS format.
       """
-      with open(path, 'r') as f:
-          lines = "".join(f.readlines()).split(' 0\n')[:-1]
-      # The problem's KB
-      self.clauses = lines[1:]
       # Whether the algorithm has constructed the list of unassigned variables yet
       self.start = True
       # The solution that the algorithm found
       self.solution = None
+
+
+  def find_solution(self, path: str) -> bool:
+      """ Attempts to find a solution for a given SAT problem.
+
+      Args:
+          path (str): The path to the .cnf file which must be solved.
+
+      Returns:
+          bool: Returns True if a solution is found else False.
+      """
+      # Open the .cnf file and load each line into a list
+      with open(path, 'r') as f:
+          lines = "".join(f.readlines()).split(' 0\n')[:-1]
+      # Begin solving the problem, we can ignore the initial first line.
+      return self.solve(lines[1:])
     
-  def solve(self, remaining=[], assignments={}, kb=[], split=False, value=None) -> bool:
+  def solve(self, kb, remaining=[], assignments={}, split=False, value=None) -> bool:
       """ Solves the .cnf file this solver was given.
 
       Args:
+          kb (List): The knowledge base (all of the clauses).
           remaining (List): The remaining unassigned variables.
           assignments (Dict): The assigned variables and their assigned values.
-          kb (List): The knowledge base (all of the clauses).
           split (bool, optional): Whether this is a splitting instance or not. Defaults to False.
           value (_type_, optional): The value of the assigned variable for this splitting instance. Defaults to None.
 
