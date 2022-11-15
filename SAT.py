@@ -16,8 +16,7 @@ def read_sudoku_from_file():
             sudoku_in = []
             for line in f.readlines():
                 #converting string line from file to integer list
-                print(line)
-                int_line = list(map(lambda t: int(t), line.replace('\n', '').split()))
+                int_line = [int(char) if char.isnumeric() else 0 for char in line]
                 print(int_line)
                 sudoku_in.append(int_line)
             return sudoku_in
