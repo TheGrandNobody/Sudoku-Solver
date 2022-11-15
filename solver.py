@@ -142,7 +142,7 @@ class DPLL():
               kb = [c if anti not in c else c.replace(anti, '') for c in kb if variable not in c or anti in c]  
       map(verify_pure, remaining)
 
-  def kb_empty(kb: List) -> bool:
+  def kb_empty(self, kb: List) -> bool:
       """ Verifies whether a given knowledge base is empty.
 
       Args:
@@ -153,7 +153,7 @@ class DPLL():
       """
       return len(kb) == 0
     
-  def empty_clauses(kb: List) -> bool:
+  def empty_clauses(self, kb: List) -> bool:
       """ Verifies whether the knowledge base contains any empty clause.
 
       Args:
