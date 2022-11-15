@@ -16,10 +16,10 @@ class DPLL():
       self.clauses = lines[1:]
       # Whether the algorithm has constructed the list of unassigned variables yet
       self.start = True
-      # Whether the algorithm found a solution or not
-      self.found = False
+      # The solution that the algorithm found
+      self.solution = None
     
-  def solve(self, remaining: List, assignments: Dict, kb: List, split=False, value=None) -> bool:
+  def solve(self, remaining=[], assignments={}, kb=[], split=False, value=None) -> bool:
       """ Solves the .cnf file this solver was given.
 
       Args:
@@ -37,7 +37,7 @@ class DPLL():
           variable = remaining.pop()
           assignments[variable] = value
           anti = variable[1:] if '-' in variable else f'-{variable}'
-          kb = [c for c in kb if variable not in c or anti in c] 
+          kb = [c if anti not in c else c.replace(anti, '') for c in kb if variable not in c or anti in c] 
       
       # Apply the unit clause rule
       self.unit_propagate(remaining, assignments, kb)
@@ -99,7 +99,7 @@ class DPLL():
               self.assign(remaining, assignments, clause)
               # Return the close to store it in a list 
               anti = clause[1:] if '-' in clause else f'-{clause}'
-              kb = [c for c in kb if clause not in c or anti in c] 
+              kb = [c if anti not in c else c.replace(anti, '') for c in kb if clause not in c or anti in c] 
               return
           if self.start:
               # Update the list of unassigned variables for the algorithm's first iteration
@@ -139,7 +139,7 @@ class DPLL():
           if is_pure:
               self.assign(remaining, assignments, variable)
               anti = clause[1:] if '-' in clause else f'-{clause}'
-              kb = [c for c in kb if clause not in c or anti in c] 
+              kb = [c if anti not in c else c.replace(anti, '') for c in kb if variable not in c or anti in c]  
       map(verify_pure, remaining)
 
   def kb_empty(kb: List) -> bool:
