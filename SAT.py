@@ -78,7 +78,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
     Subgrids =[]
     for i in range(block):
         for j in range(block):
-            Subgrids += [[(int(Rows[block*i+k]),int(Cols[block*j+l])) for k in range(3) for l in range(3)]]
+            Subgrids += [[(int(Rows[block*i+k]),int(Cols[block*j+l])) for k in range(block) for l in range(block)]]
 
     with open(out_file, "w") as f:
             
