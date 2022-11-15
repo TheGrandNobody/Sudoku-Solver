@@ -48,18 +48,15 @@ class DPLL():
       # Check whether the KB is empty
       if self.kb_empty(kb):
           print("SAT")
+          self.solution = assignments
           return True
       # Check whether there are any empty clauses
       if self.empty_clauses(kb):
           print("UNSAT")
           return False
       # Split using a positive value, otherwise backtrack using a negative value
-      if self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, True) or \
-        self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, False):
-          if not self.found:
-              self.solution = assignments
-              self.found = True
-      return self.found
+      return self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, True) or \
+        self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, False)
 
   def assign(self, remaining: List, assignments: Dict, variable: str) -> None:
       """ Assigns a true or false value to a given variable.
