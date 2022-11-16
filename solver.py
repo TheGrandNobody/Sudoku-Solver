@@ -1,6 +1,21 @@
 import copy
 from typing import List, Dict
+import time
 
+def format(string: str) -> str:
+    if string[0] == ' ':
+        return string[1:]
+    elif string[-1] == ' ':
+        return string[:-1]
+    else:
+        new = []
+        prev = None
+        for c in string:
+            if not (prev == ' ' and c == ' '):
+                new.append(c)
+            prev = c
+    return "".join(new)
+                
 class DPLL():
   """Implements the DPLL solver class.
   """
@@ -24,9 +39,9 @@ class DPLL():
       """
       # Open the .cnf file and load each line into a list
       with open(path, 'r') as f:
-          lines = "".join(f.readlines()).split(' 0\n')[:-1]
+          lines = [line[:-3].rstrip() for line in f.readlines() if 'p' not in line]
       # Begin solving the problem, we can ignore the initial first line.
-      return self.solve(lines[1:])
+      return self.solve(lines)
     
   def solve(self, kb, remaining=[], assignments={}, split=False, value=None) -> bool:
       """ Solves the .cnf file this solver was given.
@@ -45,15 +60,16 @@ class DPLL():
       if split:
           variable = remaining.pop()
           assignments[variable] = value
+          if not value:
+              variable = '-'+variable if '-' not in variable else variable[1:]
           anti = variable[1:] if '-' in variable else f'-{variable}'
-          kb = [c if anti not in c else c.replace(anti, '') for c in kb if variable not in c or anti in c] 
-      
+          kb = [c if anti not in c else format(c.replace(anti, '')) for c in kb if variable not in c or (anti in c and ('-' in anti or variable not in c))] 
       # Apply the unit clause rule
-      self.unit_propagate(remaining, assignments, kb)
+      kb, remaining, assignments = self.unit_propagate(remaining, assignments, kb)
       if self.start:
           self.start = False
       # Apply the pure literal rule
-      self.pure_literal(remaining, assignments, kb)
+      kb, remaining, assignments = self.pure_literal(remaining, assignments, kb)
       # Check whether the KB is empty
       if self.kb_empty(kb):
           print("SAT")
@@ -64,10 +80,10 @@ class DPLL():
           print("UNSAT")
           return False
       # Split using a positive value, otherwise backtrack using a negative value
-      return self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, True) or \
-        self.solve(copy.deepcopy(remaining), copy.deepcopy(assignments), copy.deepcopy(kb), True, False)
+      return self.solve(copy.deepcopy(kb), copy.deepcopy(remaining), copy.deepcopy(assignments), True, False) or \
+        self.solve(copy.deepcopy(kb), copy.deepcopy(remaining), copy.deepcopy(assignments), True, True)
 
-  def assign(self, remaining: List, assignments: Dict, variable: str) -> None:
+  def assign(self, remaining: List, assignments: Dict, variable: str, mod=None) -> None:
       """ Assigns a true or false value to a given variable.
           Removes the variable from the unassigned variables list. 
 
@@ -82,7 +98,10 @@ class DPLL():
           assignments[variable] = True
       # Remove the variable from the list of unsassigned variables.
       if not self.start:
-          remaining.remove(variable)
+          if mod:
+              remaining.remove(mod)
+          else:
+              remaining.remove(variable)
 
   def unit_propagate(self, remaining: List, assignments: Dict, kb: List) -> None:
       """ Updates the list of clauses based on the unit propagation rule.
@@ -102,14 +121,17 @@ class DPLL():
           Returns:
               str: A unit clause.
           """
+          nonlocal kb
+          nonlocal remaining
+          nonlocal assignments
           split_clause = clause.split(" ")
           if len(split_clause) == 1:
               # Set the literal to true/false if it is a unit clause
               self.assign(remaining, assignments, clause)
               # Return the close to store it in a list 
               anti = clause[1:] if '-' in clause else f'-{clause}'
-              kb = [c if anti not in c else c.replace(anti, '') for c in kb if clause not in c or anti in c] 
-              return
+              kb = [c if anti not in c else format(c.replace(anti, '')) for c in kb if clause not in c or (anti in c and ('-' in anti or clause not in c))] 
+              return True
           if self.start:
               # Update the list of unassigned variables for the algorithm's first iteration
               def update(variable) -> None:
@@ -117,8 +139,19 @@ class DPLL():
                   if variable not in remaining and variable not in assignments \
                      and anti not in remaining and anti not in assignments:
                       remaining.append(variable)
-              map(update, split_clause)
-      map(unit, copy.deepcopy(kb))
+              [update(s) for s in split_clause]
+          return False
+      
+      [unit(c) for c in copy.deepcopy(kb)]
+      found = True
+      while found:
+          found = False
+          for c in copy.deepcopy(kb):
+              any = unit(c)
+              if any:
+                  found = True
+      return kb, remaining, assignments
+      
   
   def pure_literal(self, remaining: List, assignments: Dict, kb: List) -> None:
       """ Assigns a true or false value to all pure literals
@@ -134,6 +167,9 @@ class DPLL():
           Args:
               variable (str): The specified variable.
           """
+          nonlocal remaining
+          nonlocal assignments
+          nonlocal kb
           positive, negative = 0, 0
           # Check that the variable is either only positive or negative in all of the clauses it appears in.
           for clause in kb:
@@ -143,13 +179,16 @@ class DPLL():
                       positive += 1
                   else: 
                       negative += 1
-          is_pure = not (negative > 1 and positive > 1)
+          is_pure = not (negative > 0 and positive > 0) and (negative or positive)
           # Assign the literal a truth value and remove all clauses containing it.
           if is_pure:
-              self.assign(remaining, assignments, variable)
-              anti = clause[1:] if '-' in clause else f'-{clause}'
-              kb = [c if anti not in c else c.replace(anti, '') for c in kb if variable not in c or anti in c]  
-      map(verify_pure, remaining)
+              normal = (positive > 0 and '-' not in variable) or (negative > 0 and '-' in variable)
+              actual = variable if normal else '-'+variable if negative > 0 else variable[1:]
+              self.assign(remaining, assignments, actual, variable)
+              anti = actual[1:] if '-' in actual else f'-{actual}'
+              kb = [c if anti not in c else format(c.replace(anti, '')) for c in kb if actual not in c or (anti in c and ('-' in anti or actual not in c))] 
+      [verify_pure(r) for r in copy.deepcopy(remaining)]
+      return kb, remaining, assignments
 
   def kb_empty(self, kb: List) -> bool:
       """ Verifies whether a given knowledge base is empty.
