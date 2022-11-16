@@ -7,18 +7,22 @@ import itertools
 from pulp import *
 
 def read_sudoku_from_file():
+    sudoku_in = []
     args = sys.argv
     if len(args) != 2:
         sys.exit(f"usage: python3 ./{args[0]} input_sudoku_file.txt")
-
     try:
+        print('hier')
         with open(args[1], "r") as f:
             sudoku_in = []
             for line in f.readlines():
+                rt = int(math.sqrt(len(line)))
+                for i in range(0, int(math.sqrt(len(line)))):
                 #converting string line from file to integer list
-                int_line = [int(char) if char.isnumeric() else 0 for char in line]
-                print(int_line)
-                sudoku_in.append(int_line)
+                    line = line.replace('\n', '')
+                    int_line = [int(char) if char.isnumeric() else 0 for char in line]
+                    print(int_line[i*rt:i*rt+rt])
+                    sudoku_in.append(int_line[i*rt:i*rt+rt])
             return sudoku_in
     except Exception as e:
         sys.exit(e)
@@ -74,7 +78,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
     Subgrids =[]
     for i in range(block):
         for j in range(block):
-            Subgrids += [[(int(Rows[block*i+k]),int(Cols[block*j+l])) for k in range(3) for l in range(3)]]
+            Subgrids += [[(int(Rows[block*i+k]),int(Cols[block*j+l])) for k in range(block) for l in range(block)]]
 
     with open(out_file, "w") as f:
             
