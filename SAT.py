@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+'''
+    make_cnf_dimacs is in the loop and will write to a file per line. If we are going to implent this then the solver should be implemented 
+    in this loop, idk if this the best way to solve a giant txt.file. Like I said before, it only accounts for txt files with a sudoku per line.
+    '''
+
+
+
 
 import sys, os, math
 import numpy as np
@@ -7,6 +14,7 @@ import itertools
 from pulp import *
 
 def read_sudoku_from_file(out_file):
+    
     sudoku_in = []
     args = sys.argv
     if len(args) != 2:
@@ -23,8 +31,9 @@ def read_sudoku_from_file(out_file):
                     int_line = [int(char) if char.isnumeric() else 0 for char in line]
                     print(int_line[i*rt:i*rt+rt])
                     sudoku_in.append(int_line[i*rt:i*rt+rt])
-                n = make_cnf_dimacs(sudoku_in, out_file)
-            return n#sudoku_in
+                print(sudoku_in)
+                make_cnf_dimacs(sudoku_in, out_file)
+            return sudoku_in
     except Exception as e:
         sys.exit(e)
 
@@ -194,7 +203,7 @@ def main():
 
     #n = make_cnf_dimacs(sudoku_in, out_file)
     #dupe(out_file, n)
-    print(sudoku_in)
+    print(sudoku_in,"kkkkk")
 
 
 if __name__ == "__main__":
