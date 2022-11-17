@@ -6,7 +6,7 @@ import numpy as np
 import itertools
 from pulp import *
 
-def read_sudoku_from_file():
+def read_sudoku_from_file(out_file):
     sudoku_in = []
     args = sys.argv
     if len(args) != 2:
@@ -14,8 +14,8 @@ def read_sudoku_from_file():
     try:
         print('hier')
         with open(args[1], "r") as f:
-            sudoku_in = []
             for line in f.readlines():
+                sudoku_in = []
                 rt = int(math.sqrt(len(line)))
                 for i in range(0, int(math.sqrt(len(line)))):
                 #converting string line from file to integer list
@@ -23,9 +23,11 @@ def read_sudoku_from_file():
                     int_line = [int(char) if char.isnumeric() else 0 for char in line]
                     print(int_line[i*rt:i*rt+rt])
                     sudoku_in.append(int_line[i*rt:i*rt+rt])
-            return sudoku_in
+                n = make_cnf_dimacs(sudoku_in, out_file)
+            return n#sudoku_in
     except Exception as e:
         sys.exit(e)
+
 
 
 def num_to_cnff(p,num, invert):
@@ -128,7 +130,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
                 #NOTE: CONSTRAINT 2
                 #Row
                 for a in range(1, n+1):
-                    if a != j & curr_num != 0:
+                    if a != j and curr_num != 0:
                         z = constraint(a, j, i,curr_num, True)
                         for c, d in z:
                             f.write(f"{c} ")
@@ -143,9 +145,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
                                 f.write(f"{d} ")
                                 f.write("0\n")
                                 clauses_number += 1
-
-
-                        
+                       
                 #Column
                 for b in range(1, n+1):
                     if b != j & curr_num != 0:
@@ -165,7 +165,8 @@ def make_cnf_dimacs(sudoku_in, out_file):
                                 clauses_number += 1
 
     nn_bits= n*n*num_of_bits
-    return nn_bits
+    sol = dupe(out_file,nn_bits)
+    return sol
 
 def dupe(out_file, n):
     lines_set = open(out_file, 'r').readlines()
@@ -188,11 +189,12 @@ def dupe(out_file, n):
 
 
 def main():
-    sudoku_in = read_sudoku_from_file()
     out_file = "out_sudoku3.cnf"
+    sudoku_in = read_sudoku_from_file(out_file)
 
-    n = make_cnf_dimacs(sudoku_in, out_file)
-    dupe(out_file, n)
+    #n = make_cnf_dimacs(sudoku_in, out_file)
+    #dupe(out_file, n)
+    print(sudoku_in)
 
 
 if __name__ == "__main__":
