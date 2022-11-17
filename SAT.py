@@ -182,7 +182,7 @@ def dupe(out_file, n):
 
     lines_set = set(lines_set)
     print(len(lines_set))
-    lines_set = sorted(lines_set)
+    lines_set = sorted(lines_set, reverse = True)
     print(len(lines_set))
 
     out  = open(out_file, 'w')
