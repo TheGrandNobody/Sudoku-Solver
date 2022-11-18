@@ -5,9 +5,6 @@
     in this loop, idk if this the best way to solve a giant txt.file. Like I said before, it only accounts for txt files with a sudoku per line.
     '''
 
-
-
-
 import sys, os, math
 import numpy as np
 import itertools

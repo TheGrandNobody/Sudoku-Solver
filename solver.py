@@ -144,18 +144,10 @@ class DPLL():
                       remaining.append(variable)
               [update(s) for s in split_clause]
           return False
-      
-      [unit(c) for c in copy.deepcopy(kb)]
-      found = True
-      while found:
-          found = False
-          for c in copy.deepcopy(kb):
-              any = unit(c)
-              if any:
-                  found = True
+      while True in [unit(c) for c in copy.deepcopy(kb)]:
+          pass
       return kb, remaining, assignments
       
-  
   def pure_literal(self, remaining: List, assignments: Dict, kb: List) -> None:
       """ Assigns a true or false value to all pure literals
 
@@ -182,6 +174,8 @@ class DPLL():
                       positive += 1
                   else: 
                       negative += 1
+                  if positive > 0 and negative > 0:
+                      break
           is_pure = not (negative > 0 and positive > 0) and (negative or positive)
           # Assign the literal a truth value and remove all clauses containing it.
           if is_pure:
@@ -190,7 +184,9 @@ class DPLL():
               self.assign(remaining, assignments, actual, variable)
               anti = actual[1:] if '-' in actual else f'-{actual}'
               kb = [c if anti not in c else format(c.replace(anti, '')) for c in kb if actual not in c or (anti in c and ('-' in anti or actual not in c))] 
-      [verify_pure(r) for r in copy.deepcopy(remaining)]
+          return is_pure
+      while True in [verify_pure(r) for r in copy.deepcopy(remaining)]:
+          pass
       return kb, remaining, assignments
 
   def kb_empty(self, kb: List) -> bool:
