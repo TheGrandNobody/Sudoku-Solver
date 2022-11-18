@@ -113,7 +113,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
                                     z = constraint_box(i,j,a,d, curr_num)
                                     for dd, s in z:
                                         if dd == s:
-                                            pass
+                                            continue
                                         else:
                                             f.write(f"{dd} ")
                                             f.write(f"{s} ")
@@ -124,7 +124,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
                                         z = constraint_box(i,j,a,d, v)
                                         for dd, s in z:
                                             if dd == s:
-                                                pass
+                                                continue
                                             else:
                                                 f.write(f"{dd} ")
                                                 f.write(f"{s} ")
@@ -141,7 +141,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
                         z = constraint(a, j, i,curr_num, True)
                         for c, d in z:
                             if c == d:
-                                pass
+                                continue
                             else:
                                 f.write(f"{c} ")
                                 f.write(f"{d} ")
@@ -152,12 +152,14 @@ def make_cnf_dimacs(sudoku_in, out_file):
                             z = constraint(a, j, i, v, True)
                             for c, d in z:
                                 if c == d:
-                                    pass
+                                    continue
                                 else:
                                     f.write(f"{c} ")
                                     f.write(f"{d} ")
                                     f.write("0\n")
                                     clauses_number += 1
+                    else:
+                        continue
                        
                 #Column
                 for b in range(1, n+1):
@@ -165,7 +167,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
                         z = constraint(b, i, j,curr_num, False)
                         for c, d in z:
                             if c == d:
-                                pass
+                                continue
                             else:
                                 f.write(f"{c} ")
                                 f.write(f"{d} ")
@@ -173,15 +175,18 @@ def make_cnf_dimacs(sudoku_in, out_file):
                                 clauses_number += 1
                     elif b != j & curr_num == 0:
                         for v in Values:
-                            z = constraint(b,i,j, v, True)
+                            z = constraint(b,i,j, v, False)
                             for c, d in z:
                                 if c == d:
-                                    pass
+                                    continue
                                 else:
+                                    print(c,d,"asdf")
                                     f.write(f"{c} ")
                                     f.write(f"{d} ")
                                     f.write("0\n")
                                     clauses_number += 1
+                    else:
+                        continue
 
     nn_bits= n*n*num_of_bits
     sol = dupe(out_file,nn_bits)
