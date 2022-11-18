@@ -1,12 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
-    make_cnf_dimacs is in the loop and will write to a file per line. If we are going to implent this then the solver should be implemented 
-    in this loop, idk if this the best way to solve a giant txt.file. Like I said before, it only accounts for txt files with a sudoku per line.
-    '''
-
-
-
 
 import sys, os, math
 import numpy as np
@@ -14,7 +7,6 @@ import itertools
 from pulp import *
 
 def read_sudoku_from_file(out_file):
-    
     sudoku_in = []
     args = sys.argv
     if len(args) != 2:
@@ -120,18 +112,24 @@ def make_cnf_dimacs(sudoku_in, out_file):
                                 if curr_num != 0:
                                     z = constraint_box(i,j,a,d, curr_num)
                                     for dd, s in z:
-                                        f.write(f"{dd} ")
-                                        f.write(f"{s} ")
-                                        f.write("0\n")
-                                        clauses_number += 1
-                                else:
-                                    for v in Values:
-                                        z = constraint_box(i,j,a,d, v)
-                                        for dd, s in z:
+                                        if dd == s:
+                                            pass
+                                        else:
                                             f.write(f"{dd} ")
                                             f.write(f"{s} ")
                                             f.write("0\n")
                                             clauses_number += 1
+                                else:
+                                    for v in Values:
+                                        z = constraint_box(i,j,a,d, v)
+                                        for dd, s in z:
+                                            if dd == s:
+                                                pass
+                                            else:
+                                                f.write(f"{dd} ")
+                                                f.write(f"{s} ")
+                                                f.write("0\n")
+                                                clauses_number += 1
                             break
                         else:
                             continue
@@ -142,36 +140,48 @@ def make_cnf_dimacs(sudoku_in, out_file):
                     if a != j and curr_num != 0:
                         z = constraint(a, j, i,curr_num, True)
                         for c, d in z:
-                            f.write(f"{c} ")
-                            f.write(f"{d} ")
-                            f.write("0\n")
-                            clauses_number += 1
-                    elif a != j & curr_num == 0:
-                        for v in Values:
-                            z = constraint(a, j, i, v, True)
-                            for c, d in z:
+                            if c == d:
+                                pass
+                            else:
                                 f.write(f"{c} ")
                                 f.write(f"{d} ")
                                 f.write("0\n")
                                 clauses_number += 1
+                    elif a != j & curr_num == 0:
+                        for v in Values:
+                            z = constraint(a, j, i, v, True)
+                            for c, d in z:
+                                if c == d:
+                                    pass
+                                else:
+                                    f.write(f"{c} ")
+                                    f.write(f"{d} ")
+                                    f.write("0\n")
+                                    clauses_number += 1
                        
                 #Column
                 for b in range(1, n+1):
                     if b != j & curr_num != 0:
                         z = constraint(b, i, j,curr_num, False)
                         for c, d in z:
-                            f.write(f"{c} ")
-                            f.write(f"{d} ")
-                            f.write("0\n")
-                            clauses_number += 1
-                    elif b != j & curr_num == 0:
-                        for v in Values:
-                            z = constraint(b,i,j, v, True)
-                            for c, d in z:
+                            if c == d:
+                                pass
+                            else:
                                 f.write(f"{c} ")
                                 f.write(f"{d} ")
                                 f.write("0\n")
                                 clauses_number += 1
+                    elif b != j & curr_num == 0:
+                        for v in Values:
+                            z = constraint(b,i,j, v, True)
+                            for c, d in z:
+                                if c == d:
+                                    pass
+                                else:
+                                    f.write(f"{c} ")
+                                    f.write(f"{d} ")
+                                    f.write("0\n")
+                                    clauses_number += 1
 
     nn_bits= n*n*num_of_bits
     sol = dupe(out_file,nn_bits)
@@ -182,7 +192,7 @@ def dupe(out_file, n):
 
     lines_set = set(lines_set)
     print(len(lines_set))
-    lines_set = sorted(lines_set, reverse = True)
+    lines_set = sorted(lines_set,reverse = True)
     print(len(lines_set))
 
     out  = open(out_file, 'w')
