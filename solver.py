@@ -1,20 +1,22 @@
 import copy
 from typing import List, Dict
-import time
 
 def format(string: str) -> str:
-    if string[0] == ' ':
-        return string[1:]
-    elif string[-1] == ' ':
-        return string[:-1]
-    else:
-        new = []
-        prev = None
-        for c in string:
-            if not (prev == ' ' and c == ' '):
-                new.append(c)
-            prev = c
-    return "".join(new)
+    try:
+        if string[0] == ' ':
+            return string[1:]
+        elif string[-1] == ' ':
+            return string[:-1]
+        else:
+            new = []
+            prev = None
+            for c in string:
+                if not (prev == ' ' and c == ' '):
+                    new.append(c)
+                prev = c
+            return "".join(new)
+    except:
+        return string
                 
 class DPLL():
   """Implements the DPLL solver class.
@@ -83,7 +85,7 @@ class DPLL():
       return self.solve(copy.deepcopy(kb), copy.deepcopy(remaining), copy.deepcopy(assignments), True, False) or \
         self.solve(copy.deepcopy(kb), copy.deepcopy(remaining), copy.deepcopy(assignments), True, True)
 
-  def assign(self, remaining: List, assignments: Dict, variable: str, mod=None) -> None:
+  def assign(self, remaining: List, assignments: Dict, variable: str, other: str) -> None:
       """ Assigns a true or false value to a given variable.
           Removes the variable from the unassigned variables list. 
 
@@ -98,10 +100,10 @@ class DPLL():
           assignments[variable] = True
       # Remove the variable from the list of unsassigned variables.
       if not self.start:
-          if mod:
-              remaining.remove(mod)
-          else:
+          if variable in remaining:
               remaining.remove(variable)
+          else:
+              remaining.remove(other)
 
   def unit_propagate(self, remaining: List, assignments: Dict, kb: List) -> None:
       """ Updates the list of clauses based on the unit propagation rule.
@@ -125,11 +127,12 @@ class DPLL():
           nonlocal remaining
           nonlocal assignments
           split_clause = clause.split(" ")
-          if len(split_clause) == 1:
+          # Compute the negation of the clause
+          anti = clause[1:] if '-' in clause else f'-{clause}'
+          if len(split_clause) == 1 and (clause in remaining or anti in remaining):
               # Set the literal to true/false if it is a unit clause
-              self.assign(remaining, assignments, clause)
-              # Return the close to store it in a list 
-              anti = clause[1:] if '-' in clause else f'-{clause}'
+              self.assign(remaining, assignments, clause, anti)
+              # Return the clause to store it in a list 
               kb = [c if anti not in c else format(c.replace(anti, '')) for c in kb if clause not in c or (anti in c and ('-' in anti or clause not in c))] 
               return True
           if self.start:
