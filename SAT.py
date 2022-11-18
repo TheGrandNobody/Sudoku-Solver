@@ -180,7 +180,6 @@ def make_cnf_dimacs(sudoku_in, out_file):
                                 if c == d:
                                     continue
                                 else:
-                                    print(c,d,"asdf")
                                     f.write(f"{c} ")
                                     f.write(f"{d} ")
                                     f.write("0\n")
