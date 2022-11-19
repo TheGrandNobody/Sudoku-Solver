@@ -28,9 +28,9 @@ class DPLL():
         self.start = True
         # The solution that the algorithm found
         self.solution = None
-
+        # Variable to trackback to
         self.tb = 0
-
+        # Chosen heuristic
         self.chosen_h = 0
 
 
@@ -47,7 +47,7 @@ class DPLL():
         with open(path, 'r') as f:
             lines = [line[:-3].rstrip() for line in f.readlines() if 'p' not in line]
         
-        self.chosen_h = int(option)
+        self.chosen_h = int(option) # Chosen heuristic
         
         # Begin solving the problem, we can ignore the initial first line.
         return self.solve(lines)
@@ -70,7 +70,7 @@ class DPLL():
             if self.chosen_h == 0:
                 variable = remaining.pop()#self.tb#remaining.pop()
             elif self.chosen_h == 1:
-                variable = self.tb
+                variable = self.tb # This is the variable where trackback takes place
                 remaining.remove(variable)
             assignments[variable] = value
             if not value:
@@ -230,6 +230,15 @@ class DPLL():
 
 
     def two_jw(self, kb: list, remaining):
+        """ Determines what variable to trackback to
+
+        Args:
+            kb (List): The knowledge base (all of the clauses).
+            remaning: The remaining variables
+
+        Returns:
+            The variable with the highest value according two TS-JW
+        """
         all_lit = {}
         test = remaining
         for clause in test:
