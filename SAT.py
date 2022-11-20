@@ -52,9 +52,13 @@ def read_sudoku_from_file(out_file):
         sys.exit(e)
 
 
-def num_to_cnff(p,num, invert):
-    s = -1 if invert else 1
-    clause = s * int(str(p)+str(num))
+def num_to_cnff(i,j,num, invert,sixteen):
+    if sixteen:    
+        s = -1 if invert else 1
+        clause = s * int(int(i)*17*17+int(j)*17+int(num))
+    else:    
+        s = -1 if invert else 1
+        clause = s * int(str(i)+str(j)+str(num))   
     return clause
 
 def constraint(a, j, i, num, row, sixteen):
@@ -135,7 +139,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
 
         for i in range(1, n+1):
             for j in range (1, n+1): 
-                p = int(str(i)+str(j))
+                #p = int(str(i)+str(j))
 
                 #NOTE: CONSTRAINT 1
                 #add numbers from given input sudoku
@@ -143,7 +147,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
                 curr_num = sudoku_in[i-1][j-1]#[(i-1)//n][(j-1)%n]
                 if curr_num != 0:
                     #add all non-zero numbers
-                    a = num_to_cnff(p, curr_num, False)
+                    a = num_to_cnff(i,j, curr_num, False,sixteen)
                     f.write(f"{a} 0\n")
                     clauses_number += 1
                 for b in Subgrids:
