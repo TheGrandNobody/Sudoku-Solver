@@ -32,6 +32,10 @@ class DPLL():
         self.tb = 0
         # Chosen heuristic
         self.chosen_h = 0
+        # Counts amt of splits
+        self.split_counter = 0
+        # Counts variable occurences
+        self.var_counter = {}
 
 
     def find_solution(self, path: str, option) -> bool:
@@ -72,6 +76,8 @@ class DPLL():
             elif self.chosen_h == 1:
                 variable = self.tb # This is the variable where trackback takes place
                 remaining.remove(variable)
+            elif self.chosen_h == 2:
+                variable = self.vsids(kb)
             assignments[variable] = value
             if not value:
                 variable = '-'+variable if '-' not in variable else variable[1:]
@@ -251,3 +257,30 @@ class DPLL():
                 else:
                     all_lit.update({literal:leng})
         return max(all_lit, key=all_lit.get)
+
+    def vsids(self, kb: list):
+        """ Determines what variable to trackback to for VSIDS
+
+        Args:
+            kb (List): The knowledge base (all of the clauses).
+
+        Returns:
+            The variable with the highest value according to VSIDS
+        """
+        # New split
+        self.split_counter += 1
+        print(self.split_counter)
+        # Count and add variable occurences
+        for clause in kb:
+            clause = clause.split(' ')
+            for variable in clause:
+                if variable[0] == '-':
+                    variable = variable[1:]
+                if variable not in self.var_counter:
+                    self.var_counter[variable] = 0
+                self.var_counter[variable] += 1.0
+        # Periodically divide by
+        if self.split_counter % 10 == 0:
+            self.var_counter = {key: value * 0.8 for key, value in self.var_counter.items()}
+        sorted_counter = sorted(self.var_counter.items(), key=lambda x:x[1])
+        return sorted_counter.pop()[0]
