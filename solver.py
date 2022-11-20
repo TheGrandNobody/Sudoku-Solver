@@ -72,9 +72,9 @@ class DPLL():
         # Apply the split if this is a splitting instance
         if split:
             if self.chosen_h == 0:
-                variable = remaining.pop()#self.tb#remaining.pop()
+                variable = remaining.pop()
             elif self.chosen_h == 1:
-                variable = self.tb # This is the variable where trackback takes place
+                variable = self.two_jw(kb,remaining)#self.tb # This is the variable where trackback takes place
                 remaining.remove(variable)
             elif self.chosen_h == 2:
                 variable = self.vsids(kb)
@@ -99,9 +99,11 @@ class DPLL():
             print("UNSAT")
             return False
 
+        '''
         if self.chosen_h == 1:
             self.tb = self.two_jw(kb,remaining)
             print(self.tb,"The first variable to solve for TS-JW")
+            '''
 
 
         # Split using a positive value, otherwise backtrack using a negative value
@@ -256,7 +258,8 @@ class DPLL():
                     all_lit[literal] += leng 
                 else:
                     all_lit.update({literal:leng})
-        return max(all_lit, key=all_lit.get)
+        b = max(all_lit, key=all_lit.get)
+        return b
 
     def vsids(self, kb: list):
         """ Determines what variable to trackback to for VSIDS
