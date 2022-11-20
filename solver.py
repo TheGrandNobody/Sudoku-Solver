@@ -99,12 +99,6 @@ class DPLL():
             print("UNSAT")
             return False
 
-        '''
-        if self.chosen_h == 1:
-            self.tb = self.two_jw(kb,remaining)
-            print(self.tb,"The first variable to solve for TS-JW")
-            '''
-
 
         # Split using a positive value, otherwise backtrack using a negative value
         return self.solve(copy.deepcopy(kb), copy.deepcopy(remaining), copy.deepcopy(assignments), True, False) or \
