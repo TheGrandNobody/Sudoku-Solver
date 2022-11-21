@@ -77,7 +77,8 @@ class DPLL():
                 variable = self.two_jw(kb,remaining)#self.tb # This is the variable where trackback takes place
                 remaining.remove(variable)
             elif self.chosen_h == 2:
-                variable = self.vsids(kb)
+                variable = self.vsids(kb, remaining)
+                remaining.remove(variable)
             assignments[variable] = value
             if not value:
                 variable = '-'+variable if '-' not in variable else variable[1:]
@@ -255,7 +256,7 @@ class DPLL():
         b = max(all_lit, key=all_lit.get)
         return b
 
-    def vsids(self, kb: list):
+    def vsids(self, kb: list, remaining):
         """ Determines what variable to trackback to for VSIDS
 
         Args:
@@ -266,7 +267,6 @@ class DPLL():
         """
         # New split
         self.split_counter += 1
-        print(self.split_counter)
         # Count and add variable occurences
         for clause in kb:
             clause = clause.split(' ')
@@ -276,6 +276,8 @@ class DPLL():
                 if variable not in self.var_counter:
                     self.var_counter[variable] = 0
                 self.var_counter[variable] += 1.0
+        # Only keep remaining vars
+        self.var_counter = {var: self.var_counter[var] for var in remaining}
         # Periodically divide by
         if self.split_counter % 10 == 0:
             self.var_counter = {key: value * 0.8 for key, value in self.var_counter.items()}
