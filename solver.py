@@ -77,7 +77,7 @@ class DPLL():
                 variable = self.two_jw(kb,remaining)#self.tb # This is the variable where trackback takes place
                 remaining.remove(variable)
             elif self.chosen_h == 2:
-                variable = self.vsids(kb, remaining)
+                variable = self.vsids(remaining)
                 remaining.remove(variable)
             assignments[variable] = value
             if not value:
@@ -99,7 +99,6 @@ class DPLL():
         if self.empty_clauses(kb):
             print("UNSAT")
             return False
-
 
         # Split using a positive value, otherwise backtrack using a negative value
         return self.solve(copy.deepcopy(kb), copy.deepcopy(remaining), copy.deepcopy(assignments), True, False) or \
@@ -256,19 +255,20 @@ class DPLL():
         b = max(all_lit, key=all_lit.get)
         return b
 
-    def vsids(self, kb: list, remaining):
+    def vsids(self, rem: list):
         """ Determines what variable to trackback to for VSIDS
 
         Args:
-            kb (List): The knowledge base (all of the clauses).
+            rem (List): List of remaining clauses.
 
         Returns:
             The variable with the highest value according to VSIDS
         """
         # New split
         self.split_counter += 1
+        print(self.split_counter)
         # Count and add variable occurences
-        for clause in kb:
+        for clause in rem:
             clause = clause.split(' ')
             for variable in clause:
                 if variable[0] == '-':
@@ -276,8 +276,6 @@ class DPLL():
                 if variable not in self.var_counter:
                     self.var_counter[variable] = 0
                 self.var_counter[variable] += 1.0
-        # Only keep remaining vars
-        self.var_counter = {var: self.var_counter[var] for var in remaining}
         # Periodically divide by
         if self.split_counter % 10 == 0:
             self.var_counter = {key: value * 0.8 for key, value in self.var_counter.items()}
