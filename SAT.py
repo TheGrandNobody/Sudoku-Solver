@@ -3,10 +3,7 @@
 
 import sys, os, math
 from attr import s
-import numpy as np
-import itertools
 from pulp import *
-
 
 def s_to_ch(l):
     ac = 0
@@ -89,7 +86,6 @@ def constraint_box(i,j,a,d,num,sixteen):
         clause_2 = -1 * int(str(a) + str(d) + str(num))
 
     return [(clause_1, clause_2)]
-
 
 
 #write at the beginning of file
