@@ -1,5 +1,5 @@
 # Sudoku-Solver
-This repository implements a sudoku solver using a Davis-Putnam (DPLL) algorithm, as well as two improved variations using a Jeroslow-Wang and a Variable State Independent Decaying Sum (VSIDS) heuristic.
+This repository implements a sudoku solver using a Davis-Putnam (DPLL) algorithm, as well as two improved variations using a Two-Sided Jeroslow-Wang and a Variable State Independent Decaying Sum (VSIDS) heuristic.
 
 ## Usage
 To use the SAT solver, run the following:
