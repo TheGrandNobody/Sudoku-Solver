@@ -82,8 +82,8 @@ def constraint(a, j, i, num, row, sixteen):
 
 def constraint_box(i,j,a,d,num,sixteen):
     if sixteen:
-        clause_1 = -1 * int(i)*17*17+ int(j)*17 + int(num)
-        clause_2 = -1 * int(a)*17*17+ int(d)*17 + int(num)
+        clause_1 = -1 * (int(i)*17*17+ int(j)*17 + int(num))
+        clause_2 = -1 * (int(a)*17*17+ int(d)*17 + int(num))
     else:
         clause_1 = -1 * int(str(i) + str(j) + str(num))
         clause_2 = -1 * int(str(a) + str(d) + str(num))
