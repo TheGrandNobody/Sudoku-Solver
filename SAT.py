@@ -6,6 +6,14 @@ from attr import s
 from pulp import *
 
 def s_to_ch(l):
+    ''' Convert string to corresponding number
+
+    Args: 
+        l: string to be converted
+
+    Return:
+        Correct number 
+    '''
     ac = 0
     if l == "A":
         ac = 10
@@ -26,6 +34,15 @@ def s_to_ch(l):
     return ac
 
 def read_sudoku_from_file(out_file):
+    ''' Convert lines in file to numerical Sudoku
+
+    Args: 
+        out_file: File to be written to
+        in_file: Input file, this has to be a string from the path
+
+    Return:
+        List of every row in a Sudoku
+    '''
     sudoku_in = []
     args = sys.argv
     if len(args) != 2:
@@ -50,6 +67,18 @@ def read_sudoku_from_file(out_file):
 
 
 def num_to_cnff(i,j,num, invert,sixteen):
+    ''' Numbers to DIMACS
+
+    Args: 
+        i: Row number
+        j: Column number
+        num: Value of the number
+        invert: Boolean, True if negation else False
+        Sixteen: Boolean, True if 16x16 Sudoku, False otherwise
+
+    Return:
+        Correct DIMACS
+    '''
     if sixteen:    
         s = -1 if invert else 1
         clause = s * int(int(i)*17*17+int(j)*17+int(num))
@@ -59,6 +88,19 @@ def num_to_cnff(i,j,num, invert,sixteen):
     return clause
 
 def constraint(a, j, i, num, row, sixteen):
+    ''' Convert row or column to DIMACS
+
+    Args: 
+        a: Row or column number clause 2
+        j: Row or column number clause 1
+        i: Row or column number
+        num: Value in box
+        row: Boolean, True if it's a row
+        sixteen: Boolean, True if it's a 16x16 Sudoku, False otherwise
+
+    Return:
+        Correct DIMACS 
+    '''
     if sixteen:
         s = 17
         if row:
@@ -78,6 +120,19 @@ def constraint(a, j, i, num, row, sixteen):
     return [(clause_1, clause_2)]#[clause_1, clause_2]
 
 def constraint_box(i,j,a,d,num,sixteen):
+    ''' Convert to correct DIMACS
+
+    Args: 
+        i: Row number clause 1
+        j: Column number clause 1
+        a: Row number clause 2
+        d: Column number clause 2
+        num: Value at box
+        sixteen: Boolean, True if 16x16 Sudoku, False otherwise
+
+    Return:
+        Correct DIMACS 
+    '''
     if sixteen:
         clause_1 = -1 * (int(i)*17*17+ int(j)*17 + int(num))
         clause_2 = -1 * (int(a)*17*17+ int(d)*17 + int(num))
@@ -90,6 +145,12 @@ def constraint_box(i,j,a,d,num,sixteen):
 
 #write at the beginning of file
 def insert(originalfile, string):
+    ''' Write number of variables and clauses at the beginning of the file
+
+    Args: 
+        original file: path to file
+        string: string to be inserted
+    '''
     with open(originalfile,'r') as f:
         with open('newfile.txt','w') as f2:
             f2.write(string + '\n')
@@ -97,6 +158,15 @@ def insert(originalfile, string):
     os.rename('newfile.txt', originalfile)
 
 def make_cnf_dimacs(sudoku_in, out_file):
+    ''' Convert Sudoku to DIMACS
+
+    Args: 
+        sudoku_in: Sudoku to be converted
+        out_file: path to file
+
+    Return:
+        Correct DIMACS
+    '''
     clauses_number = 0
     #dimension of puzzle and minimal number of bits to represent one number
     n = len(sudoku_in[0])
@@ -133,13 +203,9 @@ def make_cnf_dimacs(sudoku_in, out_file):
                     f.write(f"{a} ")
                 f.write("0\n")
 
+        #NOTE constraint 1 check box
         for i in range(1, n+1):
             for j in range (1, n+1): 
-                #p = int(str(i)+str(j))
-
-                #NOTE: CONSTRAINT 1
-                #add numbers from given input sudoku
-                #converting serial number (1-n*n) to index (i, j)
                 curr_num = sudoku_in[i-1][j-1]#[(i-1)//n][(j-1)%n]
                 if curr_num != 0:
                     #add all non-zero numbers
@@ -233,29 +299,35 @@ def make_cnf_dimacs(sudoku_in, out_file):
     return sol
 
 def dupe(out_file, n):
-    lines_set = open(out_file, 'r').readlines()
+    ''' Remove duplicates and write to file
 
+    Args: 
+        out_file: Path to correct file
+        n: number of variables
+    '''
+    lines_set = open(out_file, 'r').readlines()
     lines_set = set(lines_set)
     lines_set = sorted(lines_set,reverse = True)
-
     out  = open(out_file, 'w')
     for line in lines_set:
-        out.write(line)
-    
+        out.write(line)   
     out.close()
-
     insert(out_file, f"p cnf {n} {len(lines_set)}")
-
-    print('fini')
 
 
 def main():
+    '''
+    Convert txt-file to DIMACS in txt-file
+
+    Args: 
+        in_file: Path to file that has to be converted
+
+    Return:
+        Path string 
+    '''   
     out_file = "out_sudoku3.cnf"
     sudoku_in = read_sudoku_from_file(out_file)
 
-    #n = make_cnf_dimacs(sudoku_in, out_file)
-    #dupe(out_file, n)
-    print(sudoku_in,"kkkkk")
 
 
 if __name__ == "__main__":
