@@ -30,11 +30,8 @@ class DPLL():
         self.solution = None
         # Chosen heuristic
         self.chosen_h = 0
-<<<<<<< HEAD
-=======
         # Counts the number of splits
         self.split_counter = 0
->>>>>>> refs/remotes/origin/main
         # Counts variable occurences
         self.var_counter = {}
         # Whether the initial occurences counts are made yet
@@ -268,7 +265,6 @@ class DPLL():
         Returns:
             The variable with the highest value according to VSIDS
         """
-<<<<<<< HEAD
         if self.exists_var_counter == False:
             # Count variable occurences
             for clause in kb:
@@ -280,23 +276,10 @@ class DPLL():
                         self.var_counter[variable] = 0
                     self.var_counter[variable] += 1.0
             self.exists_var_counter = True
-
-        # Periodically decay 5%
-        self.var_counter = {key: value * 0.95 for key, value in self.var_counter.items()}
-=======
-        # Count and add variable occurences
-        for clause in rem:
-            clause = clause.split(' ')
-            for variable in clause:
-                if variable[0] == '-':
-                    variable = variable[1:]
-                if variable not in self.var_counter:
-                    self.var_counter[variable] = 0
-                self.var_counter[variable] += 1.0
-        # Periodically divide by
-        if self.split_counter % 10 == 0:
-            self.var_counter = {key: value * 0.8 for key, value in self.var_counter.items()}
->>>>>>> refs/remotes/origin/main
+        else:
+            # Periodically decay 5%
+            self.var_counter = {key: value * 0.95 for key, value in self.var_counter.items()}
+        
         sorted_counter = sorted(self.var_counter.items(), key=lambda x:x[1])
 
         # Choose variable to assign, if already assigned
