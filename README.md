@@ -8,8 +8,11 @@ python3 test.py path_to_sudoku heuristic_nr
 ```
 
 With the following numbers corresponding to the heursitics:
+
 0: DPLL
+
 1: Jeroslow-Wang
+
 2: VSIDS
 
 The sudoku should be in DIMACS format.
