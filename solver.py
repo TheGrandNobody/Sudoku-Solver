@@ -242,7 +242,7 @@ class DPLL():
         """
         all_lit = {}
         test = remaining
-        for clause in test:
+        for clause in kb:
             clause = clause.replace('-',"")
             a = clause.split(" ")
             for literal in a:
