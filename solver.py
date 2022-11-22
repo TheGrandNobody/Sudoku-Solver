@@ -32,10 +32,10 @@ class DPLL():
         self.tb = 0
         # Chosen heuristic
         self.chosen_h = 0
-        # Counts amt of splits
-        self.split_counter = 0
         # Counts variable occurences
         self.var_counter = {}
+        # Whether the initial occurences counts are made yet
+        self.exists_var_counter = False
 
 
     def find_solution(self, path: str, option) -> bool:
@@ -77,7 +77,7 @@ class DPLL():
                 variable = self.two_jw(kb,remaining)#self.tb # This is the variable where trackback takes place
                 remaining.remove(variable)
             elif self.chosen_h == 2:
-                variable = self.vsids(remaining)
+                variable = self.vsids(remaining, kb)
                 remaining.remove(variable)
             assignments[variable] = value
             if not value:
@@ -255,7 +255,7 @@ class DPLL():
         b = max(all_lit, key=all_lit.get)
         return b
 
-    def vsids(self, rem: list):
+    def vsids(self, rem: list, kb: list):
         """ Determines what variable to trackback to for VSIDS
 
         Args:
@@ -264,20 +264,25 @@ class DPLL():
         Returns:
             The variable with the highest value according to VSIDS
         """
-        # New split
-        self.split_counter += 1
-        print(self.split_counter)
-        # Count and add variable occurences
-        for clause in rem:
-            clause = clause.split(' ')
-            for variable in clause:
-                if variable[0] == '-':
-                    variable = variable[1:]
-                if variable not in self.var_counter:
-                    self.var_counter[variable] = 0
-                self.var_counter[variable] += 1.0
-        # Periodically divide by
-        if self.split_counter % 10 == 0:
-            self.var_counter = {key: value * 0.8 for key, value in self.var_counter.items()}
+        if self.exists_var_counter == False:
+            # Count variable occurences
+            for clause in kb:
+                clause = clause.split(' ')
+                for variable in clause:
+                    if variable[0] == '-':
+                        variable = variable[1:]
+                    if variable not in self.var_counter:
+                        self.var_counter[variable] = 0
+                    self.var_counter[variable] += 1.0
+            self.exists_var_counter = True
+
+        # Periodically decay 5%
+        self.var_counter = {key: value * 0.95 for key, value in self.var_counter.items()}
         sorted_counter = sorted(self.var_counter.items(), key=lambda x:x[1])
-        return sorted_counter.pop()[0]
+
+        # Choose variable to assign, if already assigned
+        to_assign = sorted_counter.pop()[0]
+        while to_assign not in rem:
+            to_assign = sorted_counter.pop()[0]
+        
+        return to_assign
