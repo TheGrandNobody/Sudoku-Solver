@@ -28,21 +28,25 @@ class DPLL():
         self.start = True
         # The solution that the algorithm found
         self.solution = None
-        # Variable to trackback to
-        self.tb = 0
         # Chosen heuristic
         self.chosen_h = 0
+<<<<<<< HEAD
+=======
+        # Counts the number of splits
+        self.split_counter = 0
+>>>>>>> refs/remotes/origin/main
         # Counts variable occurences
         self.var_counter = {}
         # Whether the initial occurences counts are made yet
         self.exists_var_counter = False
 
 
-    def find_solution(self, path: str, option) -> bool:
+    def find_solution(self, path: str, option: str) -> bool:
         """ Attempts to find a solution for a given SAT problem.
 
         Args:
             path (str): The path to the .cnf file which must be solved.
+
 
         Returns:
             bool: Returns True if a solution is found else False.
@@ -71,10 +75,13 @@ class DPLL():
         """
         # Apply the split if this is a splitting instance
         if split:
+            # New split
+            self.split_counter += 1
+            print(self.split_counter)
             if self.chosen_h == 0:
                 variable = remaining.pop()
             elif self.chosen_h == 1:
-                variable = self.two_jw(kb,remaining)#self.tb # This is the variable where trackback takes place
+                variable = self.two_jw(kb,remaining)
                 remaining.remove(variable)
             elif self.chosen_h == 2:
                 variable = self.vsids(remaining, kb)
@@ -85,11 +92,11 @@ class DPLL():
             anti = variable[1:] if '-' in variable else f'-{variable}'
             kb = [c if anti not in c else format(c.replace(anti, '')) for c in kb if variable not in c or (anti in c and ('-' in anti or variable not in c))] 
         # Apply the unit clause rule
-        kb, remaining, assignments = self.unit_propagate(remaining, assignments, kb)
+        kb, remaining, assignments = self.unit_propagate(kb, remaining, assignments)
         if self.start:
             self.start = False
         # Apply the pure literal rule
-        kb, remaining, assignments = self.pure_literal(remaining, assignments, kb)
+        kb, remaining, assignments = self.pure_literal(kb, remaining, assignments)
         # Check whether the KB is empty
         if self.kb_empty(kb):
             print("SAT")
@@ -112,6 +119,7 @@ class DPLL():
             remaining (List): The remaining unassigned variables.
             assignments (Dict): The assigned variables and their assigned values.
             variable (str): The specified variable.
+            other (str): An other specified variable in case we do not want to remove the actual assigned variable.
         """
         if '-' in variable:
             assignments[variable[1:]] = False
@@ -124,15 +132,15 @@ class DPLL():
             else:
                 remaining.remove(other)
 
-    def unit_propagate(self, remaining: List, assignments: Dict, kb: List) -> None:
+    def unit_propagate(self, kb: List, remaining: List, assignments: Dict) -> None:
         """ Updates the list of clauses based on the unit propagation rule.
 
         Args:
+            kb (List): The knowledge base (all of the clauses).
             remaining (List): The remaining unassigned variables.
             assignments (Dict): The assigned variables and their assigned values.
-            kb (List): The knowledge base (all of the clauses).
         """
-        def unit(clause: str) -> None:
+        def unit(clause: str) -> bool:
             """ Updates the list of literals for a given clause, if it is a unit clause.
                 Builds a list of unassigned variables if this is the algorithm's first iteration.
 
@@ -143,8 +151,6 @@ class DPLL():
                 str: A unit clause.
             """
             nonlocal kb
-            nonlocal remaining
-            nonlocal assignments
             split_clause = clause.split(" ")
             # Compute the negation of the clause
             anti = clause[1:] if '-' in clause else f'-{clause}'
@@ -163,26 +169,24 @@ class DPLL():
                         remaining.append(variable)
                 [update(s) for s in split_clause]
             return False
-        while True in [unit(c) for c in copy.deepcopy(kb)]:
+        while any(map(unit, copy.deepcopy(kb))):
             pass
         return kb, remaining, assignments
         
-    def pure_literal(self, remaining: List, assignments: Dict, kb: List) -> None:
+    def pure_literal(self, kb: List, remaining: List, assignments: Dict) -> None:
         """ Assigns a true or false value to all pure literals
 
         Args:
+            kb (List): The knowledge base (all of the clauses).
             remaining (List): The remaining unassigned variables.
             assignments (Dict): The assigned variables and their assigned values.
-            kb (List): The knowledge base (all of the clauses).
         """
-        def verify_pure(variable: str) -> None:
+        def verify_pure(variable: str) -> bool:
             """ Verifies and handles a given unassigned variable on the basis of whether it is a pure literal.
 
             Args:
                 variable (str): The specified variable.
             """
-            nonlocal remaining
-            nonlocal assignments
             nonlocal kb
             positive, negative = 0, 0
             # Check that the variable is either only positive or negative in all of the clauses it appears in.
@@ -204,7 +208,7 @@ class DPLL():
                 anti = actual[1:] if '-' in actual else f'-{actual}'
                 kb = [c if anti not in c else format(c.replace(anti, '')) for c in kb if actual not in c or (anti in c and ('-' in anti or actual not in c))] 
             return is_pure
-        while True in [verify_pure(r) for r in copy.deepcopy(remaining)]:
+        while any(map(verify_pure, copy.deepcopy(remaining))):
             pass
         return kb, remaining, assignments
 
@@ -243,7 +247,7 @@ class DPLL():
         """
         all_lit = {}
         test = remaining
-        for clause in test:
+        for clause in kb:
             clause = clause.replace('-',"")
             a = clause.split(" ")
             for literal in a:
@@ -264,6 +268,7 @@ class DPLL():
         Returns:
             The variable with the highest value according to VSIDS
         """
+<<<<<<< HEAD
         if self.exists_var_counter == False:
             # Count variable occurences
             for clause in kb:
@@ -278,6 +283,20 @@ class DPLL():
 
         # Periodically decay 5%
         self.var_counter = {key: value * 0.95 for key, value in self.var_counter.items()}
+=======
+        # Count and add variable occurences
+        for clause in rem:
+            clause = clause.split(' ')
+            for variable in clause:
+                if variable[0] == '-':
+                    variable = variable[1:]
+                if variable not in self.var_counter:
+                    self.var_counter[variable] = 0
+                self.var_counter[variable] += 1.0
+        # Periodically divide by
+        if self.split_counter % 10 == 0:
+            self.var_counter = {key: value * 0.8 for key, value in self.var_counter.items()}
+>>>>>>> refs/remotes/origin/main
         sorted_counter = sorted(self.var_counter.items(), key=lambda x:x[1])
 
         # Choose variable to assign, if already assigned
