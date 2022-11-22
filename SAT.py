@@ -116,7 +116,7 @@ def make_cnf_dimacs(sudoku_in, out_file):
     Cols = numbers
     Values = numbers
 
-    if len(Values) == 15:
+    if len(Values) == 16:
         sixteen = True
     
 
