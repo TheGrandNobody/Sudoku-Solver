@@ -74,7 +74,6 @@ class DPLL():
         if split:
             # New split
             self.split_counter += 1
-            print(self.split_counter)
             if self.chosen_h == 0:
                 variable = remaining.pop()
             elif self.chosen_h == 1:
@@ -145,7 +144,7 @@ class DPLL():
                 clause (str): The specified clause. 
 
             Returns:
-                str: A unit clause.
+                bool: True if a unit clause was found, else false.
             """
             nonlocal kb
             split_clause = clause.split(" ")
@@ -183,6 +182,9 @@ class DPLL():
 
             Args:
                 variable (str): The specified variable.
+            
+            Returns:
+                bool: True if a puire literal was found else false.
             """
             nonlocal kb
             positive, negative = 0, 0
@@ -232,7 +234,7 @@ class DPLL():
         return any(len(clause) == 0 for clause in kb)
 
 
-    def two_jw(self, kb: list, remaining):
+    def two_jw(self, kb: List) -> str:
         """ Determines what variable to trackback to
 
         Args:
@@ -240,10 +242,9 @@ class DPLL():
             remaning: The remaining variables
 
         Returns:
-            The variable with the highest value according two TS-JW
+            str: The variable with the highest value according two TS-JW
         """
         all_lit = {}
-        test = remaining
         for clause in kb:
             clause = clause.replace('-',"")
             a = clause.split(" ")
@@ -256,14 +257,15 @@ class DPLL():
         b = max(all_lit, key=all_lit.get)
         return b
 
-    def vsids(self, rem: list, kb: list):
+    def vsids(self, remaining: List, kb: List) -> str:
         """ Determines what variable to trackback to for VSIDS
 
         Args:
-            rem (List): List of remaining clauses.
+            remaining (List): The remaining variables.
+            kb (List): The knowledge base (all of the clauses) 
 
         Returns:
-            The variable with the highest value according to VSIDS
+            str: The variable with the highest value according to VSIDS
         """
         if self.exists_var_counter == False:
             # Count variable occurences
@@ -277,14 +279,14 @@ class DPLL():
                     self.var_counter[variable] += 1.0
             self.exists_var_counter = True
         else:
-            # Periodically decay 5%
+            # Periodically decay by 5%
             self.var_counter = {key: value * 0.95 for key, value in self.var_counter.items()}
         
         sorted_counter = sorted(self.var_counter.items(), key=lambda x:x[1])
 
         # Choose variable to assign, if already assigned
         to_assign = sorted_counter.pop()[0]
-        while to_assign not in rem:
+        while to_assign not in remaining:
             to_assign = sorted_counter.pop()[0]
         
         return to_assign
