@@ -14,9 +14,8 @@ if __name__ == "__main__":
         out.write(f"{b} ")
         out.write("0\n")
 
-
-    #python3 test.py sudoku/sudoku2.cnf 1
-    
+    #example: python3 test.py sudoku/sudoku2.cnf 1
     
     # 0 for basic
     # 1 for Jeroslow Wang
+    # 2 for VSIDS

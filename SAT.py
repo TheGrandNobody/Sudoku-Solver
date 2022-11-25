@@ -33,7 +33,7 @@ def s_to_ch(l):
         ac = 0
     return ac
 
-def read_sudoku_from_file(out_file):
+def read_sudoku_from_file(path):
     ''' Convert lines in file to numerical Sudoku
 
     Args: 
@@ -44,24 +44,18 @@ def read_sudoku_from_file(out_file):
         List of every row in a Sudoku
     '''
     sudoku_in = []
-    args = sys.argv
-    if len(args) != 2:
-        sys.exit(f"usage: python3 ./{args[0]} input_sudoku_file.txt")
     try:
-        print('hier')
-        with open(args[1], "r") as f:
-            for line in f.readlines():
+        with open(path, "r") as f:
+            for name, line in enumerate(f.readlines()):
                 sudoku_in = []
                 rt = int(math.sqrt(len(line)))
                 for i in range(0, int(math.sqrt(len(line)))):
                 #converting string line from file to integer list
                     line = line.replace('\n', '')
                     int_line = [int(char) if char.isnumeric() else s_to_ch(char) for char in line]
-                    print(int_line[i*rt:i*rt+rt])
                     sudoku_in.append(int_line[i*rt:i*rt+rt])
-                print(sudoku_in)
-                make_cnf_dimacs(sudoku_in, out_file)
-            return sudoku_in
+                make_cnf_dimacs(sudoku_in, 'testset/'+str(name + 1)+'.cnf')
+            return name + 1
     except Exception as e:
         sys.exit(e)
 
@@ -325,10 +319,7 @@ def main():
     Return:
         Path string 
     '''   
-    out_file = "out_sudoku3.cnf"
-    sudoku_in = read_sudoku_from_file(out_file)
-
-
+    sudoku_in = read_sudoku_from_file()
 
 if __name__ == "__main__":
     main()

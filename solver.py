@@ -48,16 +48,16 @@ class DPLL():
         Returns:
             bool: Returns True if a solution is found else False.
         """
+        self.path = path
         # Open the .cnf file and load each line into a list
         with open(path, 'r') as f:
             lines = [line[:-3].rstrip() for line in f.readlines() if 'p' not in line]
         
         self.chosen_h = int(option) # Chosen heuristic
-        
         # Begin solving the problem, we can ignore the initial first line.
-        return self.solve(lines)
+        return self.solve(lines, [], {}, False, None)
 
-    def solve(self, kb, remaining=[], assignments={}, split=False, value=None) -> bool:
+    def solve(self, kb: List, remaining: List, assignments: Dict, split: bool, value: bool) -> bool:
         """ Solves the .cnf file this solver was given.
 
         Args:
@@ -77,7 +77,7 @@ class DPLL():
             if self.chosen_h == 0:
                 variable = remaining.pop()
             elif self.chosen_h == 1:
-                variable = self.two_jw(kb,remaining)
+                variable = self.two_jw(kb)
                 remaining.remove(variable)
             elif self.chosen_h == 2:
                 variable = self.vsids(remaining, kb)
@@ -89,18 +89,16 @@ class DPLL():
             kb = [c if anti not in c else format(c.replace(anti, '')) for c in kb if variable not in c or (anti in c and ('-' in anti or variable not in c))] 
         # Apply the unit clause rule
         kb, remaining, assignments = self.unit_propagate(kb, remaining, assignments)
-        if self.start:
-            self.start = False
+
         # Apply the pure literal rule
         kb, remaining, assignments = self.pure_literal(kb, remaining, assignments)
         # Check whether the KB is empty
         if self.kb_empty(kb):
-            print("SAT")
+            print("SAT ", self.path)
             self.solution = assignments
             return True
         # Check whether there are any empty clauses
         if self.empty_clauses(kb):
-            print("UNSAT")
             return False
 
         # Split using a positive value, otherwise backtrack using a negative value
@@ -150,7 +148,7 @@ class DPLL():
             split_clause = clause.split(" ")
             # Compute the negation of the clause
             anti = clause[1:] if '-' in clause else f'-{clause}'
-            if len(split_clause) == 1 and (clause in remaining or anti in remaining):
+            if len(split_clause) == 1 and (clause in remaining or anti in remaining or self.start):
                 # Set the literal to true/false if it is a unit clause
                 self.assign(remaining, assignments, clause, anti)
                 # Return the clause to store it in a list 
@@ -165,7 +163,9 @@ class DPLL():
                         remaining.append(variable)
                 [update(s) for s in split_clause]
             return False
-        while any(map(unit, copy.deepcopy(kb))):
+        while any(list(map(unit, copy.deepcopy(kb)))):
+            if self.start:
+                self.start = False
             pass
         return kb, remaining, assignments
         
@@ -207,7 +207,7 @@ class DPLL():
                 anti = actual[1:] if '-' in actual else f'-{actual}'
                 kb = [c if anti not in c else format(c.replace(anti, '')) for c in kb if actual not in c or (anti in c and ('-' in anti or actual not in c))] 
             return is_pure
-        while any(map(verify_pure, copy.deepcopy(remaining))):
+        while any(list(map(verify_pure, copy.deepcopy(remaining)))):
             pass
         return kb, remaining, assignments
 
